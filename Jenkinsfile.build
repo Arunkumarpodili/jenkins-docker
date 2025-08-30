@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKERHUB_USER = 'arunkumar7654'
+        DOCKERHUB_REPO = 'nginx-cicd'
+        IMAGE_TAG = "${DOCKERHUB_USER}/${DOCKERHUB_REPO}:${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Arunkumarpodili/jenkins-docker.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Archive Image Tag') {
+            steps {
+                writeFile file: 'image_tag.txt', text: "${IMAGE_TAG}"
+                archiveArtifacts artifacts: 'image_tag.txt', fingerprint: true
+            }
+        }
+    }
+}
